@@ -29,15 +29,67 @@ def reset_game():
         new_target = Target("target.png", random.randrange(50, screen_width - 50), random.randrange(50, screen_height - 50))
         targets_group.add(new_target)
 
+class GameState():
+    def __init__(self):
+        self.state = "intro"
+    
+    def intro(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                self.state = "main_game"
+
+        screen.blit(background, (0,0,))
+        text_surface = font.render("Ready?", True, (255, 255, 255))
+        text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
+        screen.blit(text_surface, text_rect)
+        crosshair_group.draw(screen)
+        crosshair_group.update()
+        pygame.display.flip()
+
+    def main_game(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                crosshair.shoot()
+
+        screen.blit(background, (0,0,))
+        targets_group.draw(screen)
+        crosshair_group.draw(screen)
+        crosshair_group.update()
+        
+        pygame.display.flip()
+    
+    def state_manager(self):
+        if self.state == "intro":
+            self.intro()
+        if self.state == "main_game":
+            self.main_game()
+
+
+
 pygame.init()
 clock = pygame.time.Clock()
+game_state = GameState()
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Ready")
+font = pygame.font.SysFont("Arial", 64)
 
 screen_width = 1380
 screen_height = 950
 screen = pygame.display.set_mode((screen_width, screen_height))
 background = pygame.image.load("background.png")
 background = pygame.transform.scale(background, (screen_width, screen_height))
+ready_text = pygame.image.load
 pygame.mouse.set_visible(False)
+
+
 
 game_font = pygame.font.SysFont("Arial", 100)
 
@@ -52,23 +104,8 @@ for target in range(20):
     
 
 while True:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            sys.exit()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            crosshair.shoot()
+    game_state.state_manager()
 
-    pygame.display.flip()
-    screen.blit(background, (0,0,))
-    if not targets_group: 
-        text_surface = game_font.render("GAME OVER", True, (255, 0, 0))
-        text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
-        screen.blit(text_surface, text_rect)
-    else:
-        targets_group.draw(screen)
-    crosshair_group.draw(screen)
-    crosshair_group.update()
     clock.tick(60)
 
